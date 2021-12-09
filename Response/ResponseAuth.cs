@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Disney.Models
 {
-    public class Response
+    public class ResponseAuth
     {
         public string Status { get; set; }
         public string Message { get; set; }

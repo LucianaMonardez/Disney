@@ -1,5 +1,6 @@
 using Disney.Data;
 using Disney.IdentityAuth;
+using Disney.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -33,6 +34,7 @@ namespace Disney
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("KeyDB")));
 
             services.AddControllers();
 
@@ -61,6 +63,8 @@ namespace Disney
 
                 };
             });
+
+            services.AddTransient<IMailService, SendGridMailService>();
 
             services.AddSwaggerGen(c => {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo());

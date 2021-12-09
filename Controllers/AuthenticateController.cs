@@ -13,6 +13,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Disney.Response;
+using Disney.Services;
 
 namespace Disney.Controllers
 {
@@ -22,13 +24,14 @@ namespace Disney.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
-        //private readonly IMailService _mailService;
+        private IMailService _mailService;
 
 
-        public AuthenticateController(UserManager<ApplicationUser> userManager, IConfiguration configuration)
+        public AuthenticateController(UserManager<ApplicationUser> userManager, IConfiguration configuration, IMailService mailService)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _mailService = mailService;
         }
 
         [HttpPost]
@@ -37,7 +40,7 @@ namespace Disney.Controllers
         {
             var userExist = await _userManager.FindByNameAsync(register.Username);
             if (userExist != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "El usuario ya existe" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseAuth { Status = "Error", Message = "El usuario ya existe" });
             ApplicationUser user = new()
             {
                 Email = register.Email,
@@ -47,11 +50,12 @@ namespace Disney.Controllers
 
             var result = await _userManager.CreateAsync(user, register.Password);
             if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "La creacion del usuario fallo. Por favor revisa tu informacion de registro" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseAuth { Status = "Error", Message = "La creacion del usuario fallo. Por favor revisa tu informacion de registro" });
+            
+            //envia el mail desde el servicio sendgrid
+            await _mailService.SendEmailAsync(register.Email, "Bienvenido usuario nuevo", "<h1>Bienvenido</h1><p>Gracias por registrarte</p>");
 
-            //await _mailService.SendEmail(user);
-
-            return Ok(new Response { Status = "Success", Message = "El usuario se ha creado con exito!" });
+            return Ok(new ResponseAuth { Status = "Success", Message = "El usuario se ha creado con exito!" });
         }
         [AllowAnonymous]
         [HttpPost("auth/login")]
