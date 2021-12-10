@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Disney.Migrations.ApplicationDb
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211208193244_initialDisney")]
-    partial class initialDisney
+    [Migration("20211210041042_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -83,9 +83,6 @@ namespace Disney.Migrations.ApplicationDb
                     b.Property<int>("Calificacion")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CharacterIdPersonaje")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("FechaDeCreacion")
                         .HasColumnType("datetime2");
 
@@ -101,8 +98,6 @@ namespace Disney.Migrations.ApplicationDb
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("IdPelicula");
-
-                    b.HasIndex("CharacterIdPersonaje");
 
                     b.HasIndex("IdGenero");
 
@@ -122,22 +117,13 @@ namespace Disney.Migrations.ApplicationDb
 
             modelBuilder.Entity("Disney.Models.MovieOrSerie", b =>
                 {
-                    b.HasOne("Disney.Models.Character", null)
-                        .WithMany("MovieOrSeries")
-                        .HasForeignKey("CharacterIdPersonaje");
-
-                    b.HasOne("Disney.Models.Genre", "Genres")
+                    b.HasOne("Disney.Models.Genre", "genre")
                         .WithMany()
                         .HasForeignKey("IdGenero")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Genres");
-                });
-
-            modelBuilder.Entity("Disney.Models.Character", b =>
-                {
-                    b.Navigation("MovieOrSeries");
+                    b.Navigation("genre");
                 });
 #pragma warning restore 612, 618
         }

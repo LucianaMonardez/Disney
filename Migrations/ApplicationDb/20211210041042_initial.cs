@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Disney.Migrations.ApplicationDb
 {
-    public partial class initialDisney : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -31,8 +31,7 @@ namespace Disney.Migrations.ApplicationDb
                     TituloPelicula = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     FechaDeCreacion = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Calificacion = table.Column<int>(type: "int", nullable: false),
-                    IdGenero = table.Column<int>(type: "int", nullable: false),
-                    CharacterIdPersonaje = table.Column<int>(type: "int", nullable: true)
+                    IdGenero = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -75,35 +74,18 @@ namespace Disney.Migrations.ApplicationDb
                 column: "IdPelicula");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MovieOrSeries_CharacterIdPersonaje",
-                table: "MovieOrSeries",
-                column: "CharacterIdPersonaje");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_MovieOrSeries_IdGenero",
                 table: "MovieOrSeries",
                 column: "IdGenero");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_MovieOrSeries_Characters_CharacterIdPersonaje",
-                table: "MovieOrSeries",
-                column: "CharacterIdPersonaje",
-                principalTable: "Characters",
-                principalColumn: "IdPersonaje",
-                onDelete: ReferentialAction.Restrict);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Characters_MovieOrSeries_IdPelicula",
-                table: "Characters");
+            migrationBuilder.DropTable(
+                name: "Characters");
 
             migrationBuilder.DropTable(
                 name: "MovieOrSeries");
-
-            migrationBuilder.DropTable(
-                name: "Characters");
 
             migrationBuilder.DropTable(
                 name: "Genres");

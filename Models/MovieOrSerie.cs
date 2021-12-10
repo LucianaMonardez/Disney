@@ -9,6 +9,7 @@ namespace Disney.Models
 {
     public class MovieOrSerie
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int IdPelicula { get; set; }
         public string ImagenPelicula { get; set; }
@@ -19,10 +20,22 @@ namespace Disney.Models
         [Range(0, 5)]
         [Required(ErrorMessage = "El campo Valoracion no puede estar vacio")]
         public int Calificacion { get; set; }
+        
         public int IdGenero { get; set; }
         [ForeignKey("IdGenero")]
-        public Genre Genres { get; set; }
-        public MovieOrSerie() { }
+        public Genre genre { get; set; }
+
+        //
+        //public int IdGenero { get; set; }
+        //public Genre Genre { get; set; }
+
+        //public MovieOrSerie() { }
+
+
+        /*
+        [ForeignKey("IdPersonaje")]
+        public Character Characters{ get; set; }
+        public MovieOrSerie() { }*/
 
     }
 }

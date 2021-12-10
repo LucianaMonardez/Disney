@@ -1,6 +1,7 @@
 ﻿using Disney.Data;
 using Disney.Models;
 using Disney.Response;
+using Disney.Schemas;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -32,7 +33,7 @@ namespace Disney.Controllers
             {
                 foreach (var personaje in _context.Characters.ToList())
                 {
-                    resultado.Return += "El nombre del personaje es: " + personaje.NombrePersonaje + " Imagen:" + personaje.ImagenPersonaje;
+                    resultado.Return += "El nombre del personaje es: " + personaje.NombrePersonaje + " Imagen:" + personaje.ImagenPersonaje + "/  ";
                 }
 
                 resultado.Ok = true;
@@ -46,13 +47,48 @@ namespace Disney.Controllers
             }
         }
 
-        //Detalle personaje. Devuelve un personaje por id con todos sus atributos
+        //Detalle personaje. Devuelve un personaje por id con todos sus atributos, peliculas asociadas y genero
         [AllowAnonymous]
         [HttpGet("{id}")]
         public ActionResult<Character> Get(int id)
         {
-            return _context.Characters.Find(id);
+            var personaje = _context.Characters.Find(id);
+            if (personaje == null)
+            {
+                return NotFound();
+            }
+            _context.Entry(personaje).Reference(x => x.MovieOrSerie).Load();
+            _context.Entry(personaje.MovieOrSerie).Reference(x => x.genre).Load();
+            //personaje.MovieOrSeries = new List<MovieOrSerie> () { _context.MovieOrSeries.Find(personaje.IdPelicula) };
+
+            return personaje;
         }
+
+        //
+
+        [HttpPost("create")]
+        public ActionResult<ResponseApi> Post([FromBody] SchemaCreateCharacter character)
+        //public ActionResult Post(MovieOrSerie movie)
+        {
+            var resultado = new ResponseApi();
+            var personaje = new Character();
+            personaje.NombrePersonaje = character.NombrePersonaje;
+            personaje.ImagenPersonaje = character.ImagenPersonaje;
+            personaje.Edad = character.Edad;
+            personaje.Peso = character.Peso;
+            personaje.Historia = character.Historia;
+            personaje.IdPelicula = character.IdPelicula;
+
+
+            _context.Characters.Add(personaje);
+            _context.SaveChanges();
+            resultado.Ok = true;
+            resultado.Return = personaje;
+            _context.Entry(personaje).Reference(x => x.MovieOrSerie).Load();
+            return resultado;
+
+        }
+
 
         //Educion atributos de personaje
         [HttpPut("{id}")]
@@ -83,6 +119,106 @@ namespace Disney.Controllers
 
             return character;
         }
+        //Personaje por nombre
+        [HttpGet]
+        [Route("/characters/name")]
+        [AllowAnonymous]
+        public ActionResult<ResponseApi> GetByName([FromQuery] string name)
+        {
+            var resultado = new ResponseApi();
+            try
+            {
+                var characters = _context.Characters.Where(k => k.NombrePersonaje.Contains(name) ).ToList();
+               
+                foreach (var character in characters)
+                {
+
+                    _context.Entry(character).Reference(x => x.MovieOrSerie).Load();
+                    _context.Entry(character.MovieOrSerie).Reference(x => x.genre).Load();
+                }
+
+                resultado.Ok = true;
+                resultado.Return = characters;
+                return resultado;
+            }
+            catch (Exception error)
+            {
+                resultado.Ok = false;
+                resultado.Error = "404";
+                resultado.Error = "El personaje no existe! " + error.Message;
+
+                return resultado;
+            }
+        }
+
+        //Personaje por edad
+        [HttpGet]
+        [Route("/characters/age")]
+        [AllowAnonymous]
+        public ActionResult<ResponseApi> GetByAge([FromQuery] int age)
+        {
+            var resultado = new ResponseApi();
+            try
+            {
+                var characters = _context.Characters.Where(k => k.Edad == age).ToList();
+
+                foreach (var character in characters)
+                {
+
+                    _context.Entry(character).Reference(x => x.MovieOrSerie).Load();
+                    _context.Entry(character.MovieOrSerie).Reference(x => x.genre).Load();
+                }
+                resultado.Ok = true;
+                resultado.Return = characters;
+                return resultado;
+
+            }
+            catch (Exception error)
+            {
+                resultado.Ok = false;
+                resultado.Error = "404";
+                resultado.Error = "El personaje no existe! " + error.Message;
+
+                return resultado;
+            }
+        }
+
+
+        //Personaje por pelicula(idmovie) 
+        [HttpGet]
+        [Route("/characters/idMovie")]
+        [AllowAnonymous]
+        public ActionResult<ResponseApi> GetByIdMovie([FromQuery] int idMovie)
+        {
+            var resultado = new ResponseApi();
+            try
+            {
+                var characters = _context.Characters.Where(k => k.IdPelicula == idMovie).ToList();
+                foreach (var character in characters)
+                {
+
+                    _context.Entry(character).Reference(x => x.MovieOrSerie).Load();
+
+                    _context.Entry(character.MovieOrSerie).Reference(x => x.genre).Load();
+
+                }
+                resultado.Ok = true;
+                resultado.Return = characters;
+
+                return resultado;
+
+            }
+            catch (Exception error)
+            {
+                resultado.Ok = false;
+                resultado.Error = "404";
+                resultado.Error = "El personaje no existe! " + error.Message;
+
+                return resultado;
+            }
+        }
+
+
 
 
 

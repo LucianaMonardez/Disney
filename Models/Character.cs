@@ -9,6 +9,7 @@ namespace Disney.Models
 {
     public class Character
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int IdPersonaje { get; set; }
         public string ImagenPersonaje { get; set; }
@@ -18,11 +19,11 @@ namespace Disney.Models
         public int Edad { get; set; }
         public double Peso { get; set; }
         public string Historia { get; set; }
-        public ICollection<MovieOrSerie> MovieOrSeries { get; set; }
+        //public  virtual ICollection<MovieOrSerie> MovieOrSeries { get; set; }
+        
         public int IdPelicula { get; set; }
         [ForeignKey("IdPelicula")]
         public MovieOrSerie MovieOrSerie { get; set; }
-        public Character() { }
-
+        
     }
 }
