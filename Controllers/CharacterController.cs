@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Disney.Controllers
@@ -45,17 +46,25 @@ namespace Disney.Controllers
             try
             {
                 var personajes = _context.Characters.ToList();
+
                 if (personajes.Count == 0)
                 {
                     throw new Exception("No hay personajes para mostrar");
                 }
 
-                foreach (var personaje in _context.Characters.ToList())
+                var personajesList = new List<SchemaGetCharacters>();
+
+                foreach (var personaje in personajes)
                 {
-                    resultado.Return += "El nombre del personaje es: " + personaje.NombrePersonaje + " Imagen:" + personaje.ImagenPersonaje + "/  ";
+                    personajesList.Add(new SchemaGetCharacters()
+                    {
+                        ImagenPersonaje = personaje.ImagenPersonaje,
+                        NombrePersonaje = personaje.NombrePersonaje
+                    });
                 }
 
                 resultado.Ok = true;
+                resultado.Return = personajesList;
                 return resultado;
             }
             catch (Exception error)
@@ -210,14 +219,24 @@ namespace Disney.Controllers
 
         //Educion atributos de personaje
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] Character character)
+        public ActionResult Put(int id, [FromBody] SchemaEditCharacter character)
         {
-            if (id != character.IdPersonaje)
+            var personaje = _context.Characters.Find(id);
+
+            if (personaje is null)
             {
                 return BadRequest();
             }
 
-            _context.Entry(character).State = EntityState.Modified;
+            personaje.NombrePersonaje = character.NombrePersonaje;
+            personaje.ImagenPersonaje = character.ImagenPersonaje;
+            personaje.Edad = character.Edad;
+            personaje.Peso = character.Peso;
+            personaje.Historia = character.Historia;
+            personaje.IdPelicula = character.IdPelicula;
+
+
+            _context.Entry(personaje).State = EntityState.Modified;
             _context.SaveChanges();
             return Ok();
         }

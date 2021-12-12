@@ -52,13 +52,21 @@ namespace Disney.Controllers
                 {
                     throw new Exception("No hay peliculas para mostrar");
                 }
+                var movieList = new List<SchemaGetAllMovies>();
 
                 foreach (var movie in movies)
                 {
-                    resultado.Return += "El titulo de la pelicula es: " + movie.TituloPelicula + "  -  Fecha de creacion:  " + movie.FechaDeCreacion + "   -  Imagen:" + movie.ImagenPelicula + "/  ";
+                    movieList.Add(new SchemaGetAllMovies()
+                    {
+                        TituloPelicula = movie.TituloPelicula,
+                        FechaDeCreacion = movie.FechaDeCreacion,
+                        ImagenPelicula = movie.ImagenPelicula
+                    });
+
                 }
 
                 resultado.Ok = true;
+                resultado.Return = movieList;
                 return resultado;
             }
             catch (Exception error)
@@ -239,14 +247,20 @@ namespace Disney.Controllers
 
         //modificacion de pelicula
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] MovieOrSerie movie)
+        public ActionResult Put(int id, [FromBody] SchemaEditMovie movie)
         {
-            if (id != movie.IdPelicula)
+            var pelicula = _context.MovieOrSeries.Find(id);
+            if (pelicula is null)
             {
                 return BadRequest();
             }
+            pelicula.TituloPelicula = movie.TituloPelicula;
+            pelicula.FechaDeCreacion = movie.FechaDeCreacion;
+            pelicula.Calificacion = movie.Calificacion;
+            pelicula.ImagenPelicula = movie.ImagenPelicula;
+            pelicula.IdGenero = movie.IdGenero;
 
-            _context.Entry(movie).State = EntityState.Modified;
+            _context.Entry(pelicula).State = EntityState.Modified;
             _context.SaveChanges();
             return Ok();
         }
