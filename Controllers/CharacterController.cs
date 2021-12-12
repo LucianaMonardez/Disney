@@ -102,8 +102,7 @@ namespace Disney.Controllers
             catch (Exception error)
             {
                 resultado.Ok = false;
-                resultado.Error = "404";
-                resultado.Error = "El personaje no existe! " + error.Message;
+                resultado.Error = "404 - El personaje no existe: " + error.Message;
 
                 return resultado;
             }
@@ -133,8 +132,7 @@ namespace Disney.Controllers
             catch (Exception error)
             {
                 resultado.Ok = false;
-                resultado.Error = "404";
-                resultado.Error = "El personaje no existe! " + error.Message;
+                resultado.Error = "404 - El personaje no existe: " + error.Message;
 
                 return resultado;
             }
@@ -164,8 +162,7 @@ namespace Disney.Controllers
             catch (Exception error)
             {
                 resultado.Ok = false;
-                resultado.Error = "404";
-                resultado.Error = "El personaje no existe! " + error.Message;
+                resultado.Error = "404 - El personaje no existe: " + error.Message;
 
                 return resultado;
             }
