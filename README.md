@@ -1,5 +1,5 @@
 # ✨Disney✨
-##✨ Challenge Alkemy✨
+✨## Challenge Alkemy✨
 ❗❗❗ **Para hacer funcionar el servicio de email al registrarse se debe poner una Api Key valida de SendGrid en el appsettings.json**
 
 ✅ Se realiza el registro y loggeo de usuario. Al registrarse se envía un mail mediante SendGrid y al loggearse se genera un JWT Token.
