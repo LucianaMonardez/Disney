@@ -1,5 +1,6 @@
 ﻿using Disney.IdentityAuth;
 using Disney.Models;
+using Disney.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -9,12 +10,9 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using Disney.Response;
-using Disney.Services;
 
 namespace Disney.Controllers
 {
@@ -25,7 +23,6 @@ namespace Disney.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private IMailService _mailService;
-
 
         public AuthenticateController(UserManager<ApplicationUser> userManager, IConfiguration configuration, IMailService mailService)
         {
@@ -51,36 +48,34 @@ namespace Disney.Controllers
             var result = await _userManager.CreateAsync(user, register.Password);
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseAuth { Status = "Error", Message = "La creacion del usuario fallo. Por favor revisa tu informacion de registro" });
-            
+
             //envia el mail desde el servicio sendgrid
             await _mailService.SendEmailAsync(register.Email, "Bienvenido usuario nuevo", "<h1>Bienvenido</h1><p>Gracias por registrarte</p>");
 
             return Ok(new ResponseAuth { Status = "Success", Message = "El usuario se ha creado con exito!" });
         }
+
         [AllowAnonymous]
         [HttpPost("auth/login")]
         public async Task<ActionResult> Login([FromBody] Login login)
         {
             var user = await _userManager.FindByNameAsync(login.Username);
-            if (user!=null && await _userManager.CheckPasswordAsync(user, login.Password))
+            if (user != null && await _userManager.CheckPasswordAsync(user, login.Password))
             {
-            var authClaims = new List<Claim>
+                var authClaims = new List<Claim>
             { new Claim(ClaimTypes.Name, user.UserName),
               new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())};
-            var authorizationSigninKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]));
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(4),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authorizationSigninKey, SecurityAlgorithms.HmacSha256)
-                );
-            return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token), expiration = token.ValidTo });
+                var authorizationSigninKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]));
+                var token = new JwtSecurityToken(
+                    issuer: _configuration["JWT:ValidIssuer"],
+                    audience: _configuration["JWT:ValidAudience"],
+                    expires: DateTime.Now.AddHours(4),
+                    claims: authClaims,
+                    signingCredentials: new SigningCredentials(authorizationSigninKey, SecurityAlgorithms.HmacSha256)
+                    );
+                return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token), expiration = token.ValidTo });
             }
             return Unauthorized();
-
         }
-
-
     }
 }

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using System.Threading.Tasks;
 
 namespace Disney.Services
 {
@@ -12,6 +9,7 @@ namespace Disney.Services
     {
         Task SendEmailAsync(string toEmail, string subject, string content);
     }
+
     public class SendGridMailService : IMailService
     {
         private IConfiguration _configuration;
@@ -29,7 +27,6 @@ namespace Disney.Services
             var to = new EmailAddress(toEmail);
             var msg = MailHelper.CreateSingleEmail(from, to, subject, content, content);
             var response = await client.SendEmailAsync(msg);
-           
         }
     }
 }
