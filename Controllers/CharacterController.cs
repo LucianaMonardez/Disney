@@ -42,9 +42,14 @@ namespace Disney.Controllers
         public ActionResult<ResponseApi> Get()
         {
             var resultado = new ResponseApi();
-            var personajes = _context.Characters.ToList();
             try
             {
+                var personajes = _context.Characters.ToList();
+                if (personajes.Count == 0)
+                {
+                    throw new Exception("No hay personajes para mostrar");
+                }
+
                 foreach (var personaje in _context.Characters.ToList())
                 {
                     resultado.Return += "El nombre del personaje es: " + personaje.NombrePersonaje + " Imagen:" + personaje.ImagenPersonaje + "/  ";
@@ -53,9 +58,10 @@ namespace Disney.Controllers
                 resultado.Ok = true;
                 return resultado;
             }
-            catch (Exception)
+            catch (Exception error)
             {
                 resultado.Ok = false;
+                resultado.Error = "404 - " + error.Message;
 
                 return resultado;
             }
@@ -89,6 +95,10 @@ namespace Disney.Controllers
             try
             {
                 var characters = _context.Characters.Where(k => k.Edad == age).ToList();
+                if (characters.Count == 0)
+                {
+                    throw new Exception("Edad: " + age.ToString());
+                }
 
                 foreach (var character in characters)
                 {
@@ -118,6 +128,12 @@ namespace Disney.Controllers
             try
             {
                 var characters = _context.Characters.Where(k => k.IdPelicula == idMovie).ToList();
+
+                if (characters.Count == 0)
+                {
+                    throw new Exception("idMovie: " + idMovie.ToString());
+                }
+
                 foreach (var character in characters)
                 {
                     _context.Entry(character).Reference(x => x.MovieOrSerie).Load();
@@ -148,6 +164,10 @@ namespace Disney.Controllers
             try
             {
                 var characters = _context.Characters.Where(k => k.NombrePersonaje.Contains(name)).ToList();
+                if (characters.Count == 0)
+                {
+                    throw new Exception("Name: " + name);
+                }
 
                 foreach (var character in characters)
                 {

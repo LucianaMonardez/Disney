@@ -31,6 +31,7 @@ namespace Disney.Controllers
             {
                 return NotFound();
             }
+
             _context.MovieOrSeries.Remove(movie);
             _context.SaveChanges();
 
@@ -43,10 +44,15 @@ namespace Disney.Controllers
         public ActionResult<ResponseApi> Get()
         {
             var resultado = new ResponseApi();
-            var movies = _context.MovieOrSeries.ToList();
 
             try
             {
+                var movies = _context.MovieOrSeries.ToList();
+                if (movies.Count == 0)
+                {
+                    throw new Exception("No hay peliculas para mostrar");
+                }
+
                 foreach (var movie in movies)
                 {
                     resultado.Return += "El titulo de la pelicula es: " + movie.TituloPelicula + "  -  Fecha de creacion:  " + movie.FechaDeCreacion + "   -  Imagen:" + movie.ImagenPelicula + "/  ";
@@ -55,9 +61,10 @@ namespace Disney.Controllers
                 resultado.Ok = true;
                 return resultado;
             }
-            catch (Exception)
+            catch (Exception error)
             {
                 resultado.Ok = false;
+                resultado.Error = "404 - " + error.Message;
 
                 return resultado;
             }
@@ -74,6 +81,11 @@ namespace Disney.Controllers
             {
                 var pelicula = _context.MovieOrSeries.Find(id);
 
+                if (pelicula == null)
+                {
+                    throw new Exception("Id: " + id.ToString());
+                }
+
                 var movie = new SchemaGetMovie()
                 {
                     TituloPelicula = pelicula.TituloPelicula,
@@ -87,6 +99,7 @@ namespace Disney.Controllers
                 resultado.Ok = true;
                 resultado.Return = movie;
                 return resultado;
+
             }
             catch (Exception error)
             {
@@ -107,6 +120,11 @@ namespace Disney.Controllers
             try
             {
                 var movies = _context.MovieOrSeries.Where(k => k.genre.IdGenero == genre).ToList();
+
+                if (movies.Count == 0)
+                {
+                    throw new Exception("idGenero: " + genre.ToString());
+                }
 
                 foreach (var movie in movies)
                 {
@@ -136,6 +154,11 @@ namespace Disney.Controllers
             try
             {
                 var movies = _context.MovieOrSeries.Where(k => k.TituloPelicula == name).ToList();
+                if (movies.Count == 0)
+                {
+                    throw new Exception("Name: " + name);
+                }
+
                 foreach (var movie in movies)
                 {
                     _context.Entry(movie).Reference(x => x.genre).Load();
